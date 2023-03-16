@@ -30,7 +30,7 @@ module.exports = async function (fastify, opts) {
         tags: ["News"],
       },
       handler: async (request, reply) => {
-        return "HELLO FROM THE ETHERNET. THE YEAR IS 2000.";
+        return "HELLO FROM THE ETHERNET. THE YEAR IS 2000 AND PICKERY IS LAZILY RELAUNCHING. NO LONGER MUST YOU PREDICT THE FUTURE. WE NOW JUST GOTTA GUESS WHAT ALREADY HAPPENED.";
       },
     }),
     fastify.route({
