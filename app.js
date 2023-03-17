@@ -12,6 +12,7 @@ module.exports = async function (fastify, opts) {
     supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5bGptbHpqZWNvbmduaW9wdnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc1MTQ5NDgsImV4cCI6MTk5MzA5MDk0OH0.oiZha9LfHa2NcOBHYBCsxtottHIl25RCGZrESzTBA2U",
     supabaseUrl: "https://byljmlzjecongniopvuo.supabase.co",
   });
+
   
   fastify.register(require("@fastify/swagger"), {});
   fastify.register(require("@fastify/swagger-ui"), {
@@ -92,9 +93,12 @@ module.exports = async function (fastify, opts) {
   fastify.register(require("@fastify/cors"), {
     origin: [
       "http://localhost:3000",
-      "http://127.0.0.1:3000"
+      "http://127.0.0.1:3000",
+      "https://pickery.ngrok.io",
+      "https://www.pickery.io",
+      "https://pickery-hist-api-production.up.railway.app",
     ],
-    methods: ["GET", "PUT", "PATCH", "POST", "DELETE"],
+    methods: ["GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
   });
 
   // Do not touch the following lines

@@ -10,3 +10,14 @@
 - [ ] Import MLB
 - [ ] Import Tennis
 - [X] Swagger
+
+----
+
+##### UI Changes
+
+- Fix React App
+- Import MLS and other Logos
+
+#### iOS
+
+- [ ] Fire Confetti on % 5 making it more special.
