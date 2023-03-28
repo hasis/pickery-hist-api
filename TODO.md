@@ -20,6 +20,29 @@
 - [ ] Can Create Events and Add Games
 - [ ] Can Create Fixtures (need to check for existing somehow)
 
+#### What does this flow look like?
+
+- User creates a Set (Event)
+- User Adds existing fixtures to event
+    - Needs UI / Form
+        - Event Name : String
+        - Event Description : String
+        - Games : Array[Game]
+    - Needs Search
+    - Needs Edit Mode
+- User can create new fixture to event (Phase 2?)
+    - Needs UI / Form
+        - Home Team
+            - Name
+            - ShortName
+            - Score
+        - Away Team
+            - Name
+            - ShortName
+            - Score
+        - Date
+        - Winner
+
 ----
 
 ##### UI Changes

@@ -36,19 +36,14 @@ module.exports = async function (fastify, opts) {
         },
       },
       handler: async (request, reply) => {
-        const event_id = parseInt(request.query.event_id); 
-
-        if (!event_id || isNaN(event_id)) {
-          return reply.status(400).send("Invalid event ID parameter");
-        }
 
         const { supabase } = fastify;
+
+        const event_id = parseInt(request.query.event_id); 
         const { data, error } = await supabase.rpc("get_games_by_event", {
-          event_id
+          event_id: isNaN(event_id) ? null : event_id,
         });
-
-        console.log("event_id:", event_id);
-
+        
         if (error) {
           return error;
         } else if (!data || data.length === 0) {
