@@ -22,6 +22,45 @@ module.exports = async function (fastify, opts) {
       },
     },
     fastify.route({
+      url: "/event",
+      method: ["GET"],
+      schema: {
+        summary: "Get Feed",
+        description: "Returns an event and it's fixtures",
+        tags: ["Feed"],
+        querystring: {
+          type: "object",
+          properties: {
+            event_id: { type: "integer" },
+          },
+        },
+      },
+      handler: async (request, reply) => {
+        const event_id = parseInt(request.query.event_id); 
+
+        if (!event_id || isNaN(event_id)) {
+          return reply.status(400).send("Invalid event ID parameter");
+        }
+
+        const { supabase } = fastify;
+        const { data, error } = await supabase.rpc("get_games_by_event", {
+          event_id
+        });
+
+        console.log("event_id:", event_id);
+
+        if (error) {
+          return error;
+        } else if (!data || data.length === 0) {
+          return reply
+            .status(404)
+            .send("No games found for the specified event ID");
+        } else {
+          return { data, event_id, error };
+        }
+      },
+    }),
+    fastify.route({
       url: "/news",
       method: ["GET"],
       schema: {
@@ -99,7 +138,7 @@ module.exports = async function (fastify, opts) {
           const apiResponse = await response.json();
           const matches = apiResponse.matches.map((match) => {
             return {
-              id: match.id,
+              originMatchID: match.id,
               homeTeamName: match.homeTeam.name,
               homeTeamShortName: match.homeTeam.shortName,
               awayTeamName: match.awayTeam.name,
@@ -146,7 +185,7 @@ module.exports = async function (fastify, opts) {
 
           const matches = apiResponse.events.map((match) => {
             return {
-              id: match.idEvent,
+              originMatchID: match.idEvent,
               homeTeamName: match.strHomeTeam,
               homeTeamShortName: match.strHomeTeam.split(" ").pop(),
               awayTeamName: match.strAwayTeam,
@@ -191,13 +230,13 @@ module.exports = async function (fastify, opts) {
       handler: async (request, reply) => {
         try {
           const response = await fetch(
-            "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4346&s=2021"
+            "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4480&s=1999-2000"
           );
           const apiResponse = await response.json();
 
           const matches = apiResponse.events.map((match) => {
             return {
-              id: match.idEvent,
+              originMatchID: match.idEvent,
               homeTeamName: match.strHomeTeam,
               homeTeamShortName: match.strHomeTeam,
               awayTeamName: match.strAwayTeam,
@@ -220,6 +259,7 @@ module.exports = async function (fastify, opts) {
             .select();
 
           if (error) {
+            console.log(error);
             return error;
           } else {
             return data;
