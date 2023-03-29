@@ -22,14 +22,16 @@
 
 #### What does this flow look like?
 
-- User creates a Set (Event)
+- User creates a Set (Event) if it does not exist
+- [ ] List of events and associated Games
 - User Adds existing fixtures to event
-    - Needs UI / Form
-        - Event Name : String
+    - Needs UI / Form √
+        - Event Name : String 
         - Event Description : String
         - Games : Array[Game]
     - Needs Search
     - Needs Edit Mode
+    - Can Submit
 - User can create new fixture to event (Phase 2?)
     - Needs UI / Form
         - Home Team

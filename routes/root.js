@@ -22,6 +22,59 @@ module.exports = async function (fastify, opts) {
       },
     },
     fastify.route({
+      method: "POST",
+      url: "/events",
+      schema: {
+        body: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            description: { type: "string" },
+            games: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  homeTeamName: { type: "string" },
+                  awayTeamName: { type: "string" },
+                  gameDate: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+          required: ["name", "description", "games"],
+        },
+        response: {
+          201: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+            },
+          },
+        },
+        tags: ["events"],
+      },
+      handler: async (request, reply) => {
+        const { name, description, games } = request.body;
+
+        // Perform any necessary validation of the request data here
+        // ...
+
+        const { supabase } = fastify;
+        const { data, error } = await supabase.from("events").insert({
+          name,
+          description,
+          games: JSON.stringify(games),
+        });
+
+        if (error) {
+          reply.status(500).send({ message: "Failed to create event" });
+        } else {
+          reply.status(201).send({ id: data[0].id });
+        }
+      },
+    }),
+    fastify.route({
       url: "/event",
       method: ["GET"],
       schema: {
@@ -36,14 +89,16 @@ module.exports = async function (fastify, opts) {
         },
       },
       handler: async (request, reply) => {
-
         const { supabase } = fastify;
 
-        const event_id = parseInt(request.query.event_id); 
+        const event_id = request.query.event_id
+          ? parseInt(request.query.event_id)
+          : null;
+
         const { data, error } = await supabase.rpc("get_games_by_event", {
-          event_id: isNaN(event_id) ? null : event_id,
+          event_id,
         });
-        
+
         if (error) {
           return error;
         } else if (!data || data.length === 0) {
@@ -268,7 +323,6 @@ module.exports = async function (fastify, opts) {
     })
   );
 };
-
 
 const PostLeaderboardBody = {
   type: "object",
