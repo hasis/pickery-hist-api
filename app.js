@@ -2,7 +2,9 @@
 
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
-const fastify = require("fastify")();
+const fastify = require("fastify")({
+  logger: false
+});
 
 // Pass --options via CLI arguments in command to enable these options.
 module.exports.options = {}
@@ -94,6 +96,8 @@ module.exports = async function (fastify, opts) {
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3001",
       "https://pickery.ngrok.io",
       "https://www.pickery.io",
       "https://pickery-hist-api-production.up.railway.app",

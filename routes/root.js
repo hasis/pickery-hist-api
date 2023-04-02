@@ -1,6 +1,30 @@
 "use strict";
 
 module.exports = async function (fastify, opts) {
+  fastify.route({
+    method: "GET",
+    url: "/games",
+    handler: async (request, reply) => {
+      const { eventType } = request.query;
+      const { supabase } = fastify;
+      try {
+
+        const { data, error } = await supabase.rpc("get_games_by_event_type", {
+          event_type: eventType,
+        });
+
+        if (error) {
+          console.log(error)
+          throw new Error(error.message);
+        }
+
+        reply.status(200).send({ data });
+      } catch (error) {
+        console.error(error);
+        reply.status(500).send({ message: "Internal server error" });
+      }
+    },
+  }),
   fastify.route(
     {
       url: "/feed",
@@ -27,58 +51,77 @@ module.exports = async function (fastify, opts) {
       schema: {
         body: {
           type: "object",
+          required: ["name", "description", "games"],
           properties: {
             name: { type: "string" },
             description: { type: "string" },
             games: {
               type: "array",
               items: {
-                type: "object",
-                properties: {
-                  homeTeamName: { type: "string" },
-                  awayTeamName: { type: "string" },
-                  gameDate: { type: "string", format: "date-time" },
-                },
+                type: "string",
+                format: "uuid",
               },
             },
           },
-          required: ["name", "description", "games"],
         },
         response: {
           201: {
             type: "object",
             properties: {
-              id: { type: "string" },
+              id: { type: "integer" },
+              name: { type: "string" },
+              description: { type: "string" },
+              games: {
+                type: "array",
+                items: {
+                  type: "string",
+                  format: "uuid"
+                },
+              },
             },
           },
         },
-        tags: ["events"],
       },
       handler: async (request, reply) => {
         const { name, description, games } = request.body;
-
-        // Perform any necessary validation of the request data here
-        // ...
-
         const { supabase } = fastify;
-        const { data, error } = await supabase.from("events").insert({
-          name,
-          description,
-          games: JSON.stringify(games),
-        });
 
-        if (error) {
-          reply.status(500).send({ message: "Failed to create event" });
-        } else {
-          reply.status(201).send({ id: data[0].id });
+        const { data: event, error: eventError } = await supabase
+          .from("events")
+          .insert({
+            name,
+            description,
+          })
+          .single();
+
+        if (eventError) {
+          throw eventError;
         }
+
+        const { data: eventGames, error: eventGamesError } = await supabase
+          .from("event_games")
+          .insert(
+            games.map((gameId) => ({
+              event_id: event.id,
+              game_id: gameId,
+            })),
+          );
+
+        if (eventGamesError) {
+          throw eventGamesError;
+        }
+        const responseBody = {
+          success: true,
+          message: `${event.name} created!`,
+        };
+        reply.status(200).header("Content-Type", "application/json").send(responseBody);
       },
     }),
     fastify.route({
       url: "/event",
       method: ["GET"],
       schema: {
-        summary: "Get Feed",
+        summary: "Get Event",
         description: "Returns an event and it's fixtures",
         tags: ["Feed"],
         querystring: {
@@ -114,8 +157,8 @@ module.exports = async function (fastify, opts) {
       url: "/news",
       method: ["GET"],
       schema: {
-        summary: "Get Feed",
-        description: "Returns a feed",
+        summary: "Get News",
+        description: "Returns a news feed",
         tags: ["News"],
       },
       handler: async (request, reply) => {
@@ -126,9 +169,9 @@ module.exports = async function (fastify, opts) {
       url: "/leaderboard",
       method: ["GET"],
       schema: {
-        summary: "Get Feed",
+        summary: "Get Leaderboards",
         description: "Returns the leaderboard",
-        tags: ["Feed"],
+        tags: ["Leaderboard"],
       },
       handler: async (request, reply) => {
         const { supabase } = fastify;

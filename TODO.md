@@ -16,9 +16,10 @@
 - [X] Database Connection Created
     - Can associate the two
     - A function exists to return games associated with a specific Event
-- [ ] Basic UI Exists
-- [ ] Can Create Events and Add Games
-- [ ] Can Create Fixtures (need to check for existing somehow)
+- [X] Basic UI Exists
+- [X] Can Create Events and Add Games
+- [X] Can Create Fixtures (need to check for existing somehow)
+- [ ] Can Edit
 
 #### What does this flow look like?
 
@@ -29,9 +30,12 @@
         - Event Name : String 
         - Event Description : String
         - Games : Array[Game]
-    - Needs Search
-    - Needs Edit Mode
-    - Can Submit
+    - Needs Search √
+    - Needs a Filter by Sport Type? √
+    - Needs Edit Mode ! 
+        - Remove Game from Event: "[Remove]" button
+    - Can Submit √
+
 - User can create new fixture to event (Phase 2?)
     - Needs UI / Form
         - Home Team
@@ -52,6 +56,8 @@
 - [ ] Fix React App
 - [ ] Import MLS and other Logos
 - [ ] Look into a CDN for logos?
+
+- [ ] WTF was happening with the game rules the other day?
 
 #### iOS
 
