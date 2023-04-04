@@ -54,10 +54,10 @@
 
 These exist in the database and are returned one by one from the API. 
 
-- [ ] Display in iOS UI
+- [X] Display in iOS UI
 - [ ] Return in React App
-- [ ] API Endpoint
-- [ ] API Endpoint to grab a random string row from database
+- [X] API Endpoint
+- [X] API Endpoint to grab a random string row from database
 - [ ] Admin Portal has a place to add a string
 
 ----

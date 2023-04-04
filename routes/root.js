@@ -7,6 +7,7 @@ module.exports = async function (fastify, opts) {
     handler: async (request, reply) => {
       const { eventType } = request.query;
       const { supabase } = fastify;
+
       try {
         const { data, error } = await supabase.rpc("get_games_by_event_type", {
           event_type: eventType,
@@ -37,8 +38,6 @@ module.exports = async function (fastify, opts) {
           const { supabase } = fastify;
           const { data, error } = await supabase.rpc("randomfeed");
 
-          console.log(data)
-
           if (error) {
             return error;
           } else {
@@ -46,113 +45,113 @@ module.exports = async function (fastify, opts) {
           }
         },
       },
-fastify.route({
-  method: "POST",
-  url: "/events",
-  schema: {
-    body: {
-      type: "object",
-      required: ["name", "description", "games", "editMode"],
-      properties: {
-        name: { type: "string" },
-        description: { type: "string" },
-        games: {
-          type: "array",
-          items: {
-            type: "string",
-            format: "uuid",
+      fastify.route({
+        method: "POST",
+        url: "/events",
+        schema: {
+          body: {
+            type: "object",
+            required: ["name", "description", "games", "editMode"],
+            properties: {
+              name: { type: "string" },
+              description: { type: "string" },
+              games: {
+                type: "array",
+                items: {
+                  type: "string",
+                  format: "uuid",
+                },
+              },
+              editMode: { type: "boolean" },
+              id: { type: "string", format: "uuid" },
+            },
+          },
+          response: {
+            200: {
+              type: "object",
+              properties: {
+                success: { type: "boolean" },
+                message: { type: "string" },
+              },
+            },
           },
         },
-        editMode: { type: "boolean" },
-        id: { type: "string", format: "uuid" },
-      },
-    },
-    response: {
-      200: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
+        handler: async (request, reply) => {
+          const { name, description, games, editMode, eventID, isActive } =
+            request.body;
+          const { supabase } = fastify;
+
+          try {
+            let event;
+            let eventGames;
+
+            if (editMode) {
+              // Update existing event
+              event = await supabase
+                .from("events")
+                .upsert({
+                  id: eventID,
+                  name,
+                  description,
+                  isActive,
+                })
+                .single();
+
+              console.log({ message: "UPDATED", id: event });
+              // Delete existing event_games records
+              await supabase
+                .from("event_games")
+                .delete()
+                .eq("event_id", eventID);
+
+              // Insert new event_games records
+              eventGames = await supabase.from("event_games").insert(
+                games.map((game) => ({
+                  event_id: event.data.id,
+                  game_id: game,
+                }))
+              );
+            } else {
+              // Create new event
+              event = await supabase
+                .from("events")
+                .insert({
+                  name,
+                  description,
+                  isActive,
+                })
+                .single();
+
+              console.log({ message: "CREATED", event: event });
+
+              // Insert new event_games records
+              eventGames = await supabase.from("event_games").insert(
+                games.map((game) => ({
+                  event_id: event.data.id,
+                  game_id: game,
+                }))
+              );
+            }
+
+            if (!event || !eventGames) {
+              throw new Error("Failed to create or update event");
+            }
+
+            const message = editMode ? "Event updated!" : "Event created!";
+            const responseBody = {
+              success: true,
+              message,
+            };
+            reply
+              .status(200)
+              .header("Content-Type", "application/json")
+              .send(responseBody);
+          } catch (error) {
+            console.error(error);
+            reply.status(500).send({ success: false, message: "Server error" });
+          }
         },
-      },
-    },
-  },
-  handler: async (request, reply) => {
-    const { name, description, games, editMode, eventID, isActive } = request.body;
-    const { supabase } = fastify;
-
-    try {
-      let event;
-      let eventGames;
-
-      console.log(request.body)
-
-      if (editMode) {
-        // Update existing event
-        event = await supabase
-          .from("events")
-          .upsert({
-            id: eventID,
-            name,
-            description,
-            isActive
-          })
-          .single();
-
-        console.log({message: "UPDATED", id: event})
-        // Delete existing event_games records
-        await supabase.from("event_games").delete().eq("event_id", eventID);
-
-        // Insert new event_games records
-        eventGames = await supabase
-          .from("event_games")
-          .insert(
-            games.map((game) => ({
-              event_id: event.data.id,
-              game_id: game,
-            })
-            )
-          );
-      } else {
-        // Create new event
-        event = await supabase
-          .from("events")
-          .insert({
-            name,
-            description,
-            isActive
-          })
-          .single();
-
-          console.log({ message: "CREATED", event: event });
-
-        // Insert new event_games records
-        eventGames = await supabase
-          .from("event_games")
-          .insert(
-            games.map((game) => ({
-              event_id: event.data.id,
-              game_id: game,
-            }))
-          );
-      }
-
-      if (!event || !eventGames) {
-        throw new Error("Failed to create or update event");
-      }
-
-      const message = editMode ? "Event updated!" : "Event created!";
-      const responseBody = {
-        success: true,
-        message,
-      };
-      reply.status(200).header("Content-Type", "application/json").send(responseBody);
-    } catch (error) {
-      console.error(error);
-      reply.status(500).send({ success: false, message: "Server error" });
-    }
-  },
-}),
+      }),
       fastify.route({
         url: "/event",
         method: ["GET"],
@@ -199,6 +198,10 @@ fastify.route({
         },
         handler: async (request, reply) => {
           const { supabase } = fastify;
+
+          // Check if the request has a `random` query parameter
+          const isRandom = request.query.random !== undefined;
+
           const { data, error } = await supabase
             .from("news_articles")
             .select()
@@ -207,9 +210,48 @@ fastify.route({
           if (error) {
             return error;
           } else {
-            const randomIndex = Math.floor(Math.random() * data.length);
-            const randomArticle = data[randomIndex];
-            return randomArticle.content;
+            if (isRandom) {
+              // Get a random news article
+              const randomIndex = Math.floor(Math.random() * data.length);
+              const randomArticle = data[randomIndex];
+
+              return randomArticle.content;
+            } else {
+              // Return all news articles
+              return data;
+            }
+          }
+        },
+      }),
+      fastify.route({
+        method: "POST",
+        url: "/news",
+        schema: {
+          body: {
+            type: "object",
+            properties: {
+              content: { type: "string" },
+            },
+            required: ["content"],
+          },
+        },
+        handler: async (request, reply) => {
+          const { supabase } = fastify;
+
+          // Extract the content from the request body
+          const { content } = request.body;
+
+          // Insert the new News Article into the Supabase table
+          const { data, error } = await supabase
+            .from("news_articles")
+            .insert({ content })
+            .single();
+
+          if (error) {
+            console.log(error);
+            reply.status(500).send(error);
+          } else {
+            reply.send(data);
           }
         },
       }),
