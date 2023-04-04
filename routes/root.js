@@ -198,7 +198,19 @@ fastify.route({
           tags: ["News"],
         },
         handler: async (request, reply) => {
-          return "HELLO FROM THE ETHERNET. THE YEAR IS 2000 AND PICKERY IS LAZILY RELAUNCHING. NO LONGER MUST YOU PREDICT THE FUTURE. WE NOW JUST GOTTA GUESS WHAT ALREADY HAPPENED.";
+          const { supabase } = fastify;
+          const { data, error } = await supabase
+            .from("news_articles")
+            .select()
+            .filter("isActive", "eq", true);
+
+          if (error) {
+            return error;
+          } else {
+            const randomIndex = Math.floor(Math.random() * data.length);
+            const randomArticle = data[randomIndex];
+            return randomArticle.content;
+          }
         },
       }),
       fastify.route({
