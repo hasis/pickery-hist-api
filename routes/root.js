@@ -198,14 +198,12 @@ module.exports = async function (fastify, opts) {
         },
         handler: async (request, reply) => {
           const { supabase } = fastify;
-
-          // Check if the request has a `random` query parameter
           const isRandom = request.query.random !== undefined;
-
           const { data, error } = await supabase
             .from("news_articles")
             .select()
-            .filter("isActive", "eq", true);
+            .filter(isRandom ? "isActive" : "", "eq", true);
+
 
           if (error) {
             return error;
@@ -223,38 +221,59 @@ module.exports = async function (fastify, opts) {
           }
         },
       }),
-      fastify.route({
-        method: "POST",
-        url: "/news",
-        schema: {
-          body: {
-            type: "object",
-            properties: {
-              content: { type: "string" },
-            },
-            required: ["content"],
-          },
-        },
-        handler: async (request, reply) => {
-          const { supabase } = fastify;
+fastify.route({
+  method: "POST",
+  url: "/news",
+  schema: {
+    body: {
+      type: "object",
+      // properties: {
+      //   content: { type: "object" },
+      //   isEditing: { type: "boolean" },
+      //   id: { type: "number" },
+      // },
+      required: ["content", "isEditing"],
+    },
+  },
+  handler: async (request, reply) => {
+    const { supabase } = fastify;
 
-          // Extract the content from the request body
-          const { content } = request.body;
+    // Extract the content, isEditing, and id from the request body
+    const { content, isEditing, id, isActive } = request.body;
 
-          // Insert the new News Article into the Supabase table
-          const { data, error } = await supabase
-            .from("news_articles")
-            .insert({ content })
-            .single();
+    const updatedContent = content;
 
-          if (error) {
-            console.log(error);
-            reply.status(500).send(error);
-          } else {
-            reply.send(data);
-          }
-        },
-      }),
+    if (isEditing) {
+      // Update the existing News Article in the Supabase table
+      const { error } = await supabase
+        .from("news_articles")
+        .update({ content: updatedContent, isActive })
+        .match({ id });
+
+      if (error) {
+        console.log(error);
+        reply.status(500).send(error);
+      } else {
+        console.log("SUCCESS")
+        reply.send("News Article updated successfully");
+      }
+    } else {
+      // Insert the new News Article into the Supabase table
+      const { data, error } = await supabase
+        .from("news_articles")
+        .insert({ content: updatedContent })
+        .single();
+
+      if (error) {
+        console.log(error);
+        reply.status(500).send(error);
+      } else {
+        console.log({new: data})
+        reply.send(data);
+      }
+    }
+  },
+}),
       fastify.route({
         url: "/leaderboard",
         method: ["GET"],
