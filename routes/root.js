@@ -86,6 +86,8 @@ module.exports = async function (fastify, opts) {
             let eventGames;
             let combinedGames;
 
+            console.log(newGames)
+
             if (newGames) {
               const addedGamesData = await supabase
                 .from("games")
@@ -93,8 +95,8 @@ module.exports = async function (fastify, opts) {
                 .select();
               const addedGames = addedGamesData.data.map((game) => game.id);
               combinedGames = [...games, ...addedGames];
+              console.log({addedGames, combinedGames})
             }
-
             
             if (editMode) {
               // Update existing event
