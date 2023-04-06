@@ -99,8 +99,9 @@ module.exports = async function (fastify, opts) {
                   throw new Error("Failed to create games");
                 }
 
-              console.log(addedGames)
+              
               const addedGames = addedGamesData.data.map((game) => game.id);
+              console.log(addedGames);
               combinedGames = [...games, ...addedGames];
               console.log({addedGames, combinedGames})
             }
