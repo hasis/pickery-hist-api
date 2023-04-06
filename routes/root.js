@@ -86,24 +86,22 @@ module.exports = async function (fastify, opts) {
             let eventGames;
             let combinedGames;
 
-            console.log(newGames)
-
             if (newGames) {
-              const {addedGamesData, error} = await supabase
-                .from("games")
-                .insert(newGames)
-                .select();
+              try {
+                const addedGamesData = await supabase
+                  .from("games")
+                  .insert(newGames)
+                  .select();
 
-                if (error) {
-                  console.log(error)
-                  throw new Error("Failed to create games");
-                }
+                  console.log({ addedGamesData: addedGamesData });
 
-                            console.log({ addedGamesData: addedGamesData });
-
-              const addedGames = addedGamesData.data.map((game) => game.id);
-              combinedGames = [...games, ...addedGames];
-              console.log({addedGames, combinedGames})
+                  const addedGames = addedGamesData.data.map((game) => game.id);
+                  combinedGames = [...games, ...addedGames];
+                  console.log({ addedGames, combinedGames });
+              } catch (error) {
+                console.log(error);
+                throw new Error("Failed to create games");
+              }
             }
             
             if (editMode) {
