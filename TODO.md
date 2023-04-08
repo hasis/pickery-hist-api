@@ -74,7 +74,11 @@ These exist in the database and are returned one by one from the API.
 
 ##### Random
 
-- [ ] How do I add a new EventType? (TODO)
+- [X] How do I add a new EventType? (TODO)
+> Currently requires code change and delivering an eventType not defined in the iOS client will break it. 
+
+- Have app only ask for things it knows about (from enum).
+
 
 - Wrestling/UFC
 - Tennis
@@ -87,7 +91,7 @@ These exist in the database and are returned one by one from the API.
 - [X] Fix React App
 - [ ] Import MLS and other Logos (TODO)
 - [ ] Look into a CDN for logos? (TODO)
-- [ ] WTF was happening with the game rules the other day? (TODO)
+- [X] WTF was happening with the game rules the other day? (TODO)
 - [ ] When no logo, don't default to soccer. Use the eventType. Differentiate! (TODO)
 
 #### iOS
@@ -108,3 +112,9 @@ These exist in the database and are returned one by one from the API.
         - [X] This would require the APIs to be rewritten (for POST) (FALSE)
         - [ ] Rewrite GET endpoint to accept an optional parameter for gameType and only return those Leaderboard entries. Currently returns all. (TODO)
         - [X] Any current implementations of Leaderboard would break (FALSE)
+
+- [X] Splash Screen
+- [ ] Leaderboard should take you to event.
+
+-- Bulk Import games into event (like all of NFL, all of NBA, etc)
+> Important! Before release to prod.

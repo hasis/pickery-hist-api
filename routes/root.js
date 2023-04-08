@@ -85,7 +85,6 @@ module.exports = async function (fastify, opts) {
             let event;
             let eventGames;
             let combinedGames;
-
             if (newGames) {
               try {
                 const addedGamesData = await supabase
@@ -93,11 +92,8 @@ module.exports = async function (fastify, opts) {
                   .insert(newGames)
                   .select();
 
-                  console.log({ addedGamesData: addedGamesData });
-
                   const addedGames = addedGamesData.data.map((game) => game.id);
                   combinedGames = [...games, ...addedGames];
-                  console.log({ addedGames, combinedGames });
               } catch (error) {
                 console.log(error);
                 throw new Error("Failed to create games");
@@ -155,8 +151,6 @@ module.exports = async function (fastify, opts) {
             if (!event || !eventGames) {
               throw new Error("Failed to create or update event");
             }
-
-            console.log({event, eventGames})
 
             const message = editMode ? "Event updated!" : "Event created!";
             const responseBody = {
@@ -453,7 +447,7 @@ module.exports = async function (fastify, opts) {
         handler: async (request, reply) => {
           try {
             const response = await fetch(
-              "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4480&s=1999-2000"
+              "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4346&s=2015"
             );
             const apiResponse = await response.json();
 
