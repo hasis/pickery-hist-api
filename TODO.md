@@ -118,3 +118,5 @@ These exist in the database and are returned one by one from the API.
 
 -- Bulk Import games into event (like all of NFL, all of NBA, etc)
 > Important! Before release to prod.
+
+- React Admin: Editing event (added games) didn't close the form but saved changes.
