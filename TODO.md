@@ -8,6 +8,7 @@
     https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4387&s=2021-2022
 - [X] Import NFL
 - [X] Swagger
+- [ ] Send Push Notifs when Packs are added (+ add a checkbox in the UI).
 
 #### Create Sets:
 
@@ -112,6 +113,7 @@ These exist in the database and are returned one by one from the API.
         - [X] This would require the APIs to be rewritten (for POST) (FALSE)
         - [ ] Rewrite GET endpoint to accept an optional parameter for gameType and only return those Leaderboard entries. Currently returns all. (TODO)
         - [X] Any current implementations of Leaderboard would break (FALSE)
+- [x] Integrate Push Notifications
 
 - [X] Splash Screen
 - [ ] Leaderboard should take you to event.
