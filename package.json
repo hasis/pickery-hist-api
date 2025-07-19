@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "tap \"test/**/*.test.js\"",
-    "start": "fastify start -l info app.js",
+    "start": "node app.js",
     "threeoh" : "fastify start -w -l info -p 8080 -a 0.0.0.0 app.js",
     "dev": "fastify start -w -l info -P -p 8080 app.js",
     "info": "fastify print-routes ./routes/root.js"

@@ -1,23 +1,21 @@
-'use strict'
+"use strict";
 
-const path = require('path')
-const AutoLoad = require('@fastify/autoload')
-const fastify = require("fastify")({
-  logger: false
-});
+const path = require("path");
+const Fastify = require("fastify");
+const AutoLoad = require("@fastify/autoload");
 
-// Pass --options via CLI arguments in command to enable these options.
-module.exports.options = {}
+async function buildServer() {
+  const fastify = Fastify({ logger: true });
 
-module.exports = async function (fastify, opts) {
+  // Supabase
   fastify.register(require("fastify-supabase"), {
     supabaseKey:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2Rmc21heXJkYmtwamZwb3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5MjM5OTIsImV4cCI6MjA2ODQ5OTk5Mn0.9n9Y8VkODuuH6jHu6T6SyVZhs6uvFEYa73-oFfv8xSY",
     supabaseUrl: "https://bjgdfsmayrdbkpjfpoym.supabase.co",
   });
 
-  
-  fastify.register(require("@fastify/swagger"), {});
+  // Swagger Docs
+  fastify.register(require("@fastify/swagger"));
   fastify.register(require("@fastify/swagger-ui"), {
     routePrefix: "/docs",
     swagger: {
@@ -36,7 +34,7 @@ module.exports = async function (fastify, opts) {
         url: "https://www.johndoe.com/api/",
         description: "Find more info here",
       },
-      host: "127.0.0.1:8080",
+      host: "127.0.0.1:8080", // Not used in production, safe to leave
       basePath: "",
       schemes: ["http", "https"],
       consumes: ["application/json"],
@@ -52,47 +50,29 @@ module.exports = async function (fastify, opts) {
           type: "object",
           required: ["id", "email"],
           properties: {
-            id: {
-              type: "number",
-              format: "uuid",
-            },
-            firstName: {
-              type: "string",
-            },
-            lastName: {
-              type: "string",
-            },
-            email: {
-              type: "string",
-              format: "email",
-            },
+            id: { type: "number", format: "uuid" },
+            firstName: { type: "string" },
+            lastName: { type: "string" },
+            email: { type: "string", format: "email" },
           },
         },
       },
     },
+    exposeRoute: true,
     uiConfig: {
-      docExpansion: "none", // expand/not all the documentations none|list|full
+      docExpansion: "none",
       deepLinking: true,
-    },
-    uiHooks: {
-      onRequest: function (request, reply, next) {
-        next();
-      },
-      preHandler: function (request, reply, next) {
-        next();
-      },
     },
     staticCSP: false,
     transformStaticCSP: (header) => header,
-    exposeRoute: true,
   });
 
-  // Executes Swagger
   fastify.ready((err) => {
     if (err) throw err;
     fastify.swagger();
   });
 
+  // CORS
   fastify.register(require("@fastify/cors"), {
     origin: [
       "http://localhost:8080",
@@ -104,20 +84,32 @@ module.exports = async function (fastify, opts) {
     methods: ["GET", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
   });
 
-  // Do not touch the following lines
-
-  // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
+  // Load support plugins
   fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'plugins'),
-    options: Object.assign({}, opts)
-  })
+    dir: path.join(__dirname, "plugins"),
+  });
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
+  // Load route definitions
   fastify.register(AutoLoad, {
-    dir: path.join(__dirname, 'routes'),
-    options: Object.assign({}, opts)
-  })
+    dir: path.join(__dirname, "routes"),
+  });
+
+  return fastify;
 }
+
+// Start the server
+buildServer()
+  .then((fastify) => {
+    const port = process.env.PORT || 8080;
+    fastify.listen({ port, host: "0.0.0.0" }, (err) => {
+      if (err) {
+        console.error(err);
+        process.exit(1);
+      }
+      console.log(`🚀 Server listening on http://0.0.0.0:${port}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  });
