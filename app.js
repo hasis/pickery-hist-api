@@ -36,7 +36,7 @@ module.exports = async function (fastify, opts) {
         url: "https://www.johndoe.com/api/",
         description: "Find more info here",
       },
-      host: "127.0.0.1:3000",
+      host: "127.0.0.1:8080",
       basePath: "",
       schemes: ["http", "https"],
       consumes: ["application/json"],
@@ -95,10 +95,8 @@ module.exports = async function (fastify, opts) {
 
   fastify.register(require("@fastify/cors"), {
     origin: [
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
+      "http://localhost:8080",
+      "http://127.0.0.1:8080",
       "https://pickery.ngrok.io",
       "https://www.pickery.io",
       "https://pickery-hist-api-production.up.railway.app",
