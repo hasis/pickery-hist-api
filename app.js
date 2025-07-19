@@ -11,8 +11,9 @@ module.exports.options = {}
 
 module.exports = async function (fastify, opts) {
   fastify.register(require("fastify-supabase"), {
-    supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5bGptbHpqZWNvbmduaW9wdnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc1MTQ5NDgsImV4cCI6MTk5MzA5MDk0OH0.oiZha9LfHa2NcOBHYBCsxtottHIl25RCGZrESzTBA2U",
-    supabaseUrl: "https://byljmlzjecongniopvuo.supabase.co",
+    supabaseKey:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ2Rmc21heXJkYmtwamZwb3ltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5MjM5OTIsImV4cCI6MjA2ODQ5OTk5Mn0.9n9Y8VkODuuH6jHu6T6SyVZhs6uvFEYa73-oFfv8xSY",
+    supabaseUrl: "https://bjgdfsmayrdbkpjfpoym.supabase.co",
   });
 
   
